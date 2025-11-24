@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Virtual Environment
+venv/
+env/
+.venv/
+.env
+
+# Database
+*.db
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Agent
+.agent/
+development_plan.md/
+
+# Reflex
+.web/
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (images uploaded by users)
+uploads/*
+!uploads/.gitkeep
