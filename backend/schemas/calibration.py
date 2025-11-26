@@ -81,6 +81,7 @@ class CalibrationImageResponse(BaseModel):
     id: int
     calibration_run_id: int
     pose_index: int
+    image_path: str
     original_filename: str
     uploaded_at: datetime
     file_size_bytes: int
