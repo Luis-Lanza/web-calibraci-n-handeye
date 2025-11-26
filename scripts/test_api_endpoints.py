@@ -220,6 +220,106 @@ def test_get_calibration_detail(token, calibration_id):
     
     return calibration
 
+def test_add_robot_pose_manual(token, calibration_id):
+    """Test adding a robot pose manually"""
+    print_section("TEST 9: Add Robot Pose (Manual)")
+    
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    
+    # Add a new pose (index 100)
+    pose_data = {
+        "pose_index": 100,
+        "x": 100.0,
+        "y": 200.0,
+        "z": 300.0,
+        "rx": 0.0,
+        "ry": 0.0,
+        "rz": 90.0
+    }
+    
+    response = requests.post(
+        f"{BASE_URL}/api/v1/calibrations/{calibration_id}/robot-poses",
+        headers=headers,
+        json=pose_data
+    )
+    
+    assert response.status_code == 200, f"Add manual pose failed: {response.status_code} - {response.text}"
+    pose = response.json()
+    
+    print(f"✓ Manual pose added")
+    print(f"  Index: {pose['pose_index']}")
+    print(f"  Input Method: {pose['input_method']}")
+    
+    return True
+
+def test_list_images(token, calibration_id):
+    """Test listing images"""
+    print_section("TEST 10: List Images")
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.get(
+        f"{BASE_URL}/api/v1/calibrations/{calibration_id}/images",
+        headers=headers
+    )
+    
+    assert response.status_code == 200, f"List images failed: {response.status_code}"
+    images = response.json()
+    
+    print(f"✓ Images retrieved")
+    print(f"  Total: {len(images)}")
+    if images:
+        print(f"  First image: {images[0]['original_filename']}")
+    
+    return True
+
+def test_execute_calibration(token, calibration_id):
+    """Test executing calibration"""
+    print_section("TEST 11: Execute Calibration")
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.post(
+        f"{BASE_URL}/api/v1/calibrations/{calibration_id}/execute",
+        headers=headers
+    )
+    
+    # We expect 200 OK even if calibration fails (success=False in body)
+    assert response.status_code == 200, f"Execute failed: {response.status_code} - {response.text}"
+    result = response.json()
+    
+    print(f"✓ Execution endpoint called")
+    print(f"  Success: {result['success']}")
+    if result['success']:
+        print(f"  Error (Reprojection): {result['reprojection_error']:.4f}")
+    else:
+        print(f"  Message: {result.get('error_message')}")
+        
+    return True
+
+def test_delete_calibration(token, calibration_id):
+    """Test deleting calibration"""
+    print_section("TEST 12: Delete Calibration")
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.delete(
+        f"{BASE_URL}/api/v1/calibrations/{calibration_id}",
+        headers=headers
+    )
+    
+    assert response.status_code == 204, f"Delete failed: {response.status_code} - {response.text}"
+    
+    # Verify it's gone
+    response = requests.get(
+        f"{BASE_URL}/api/v1/calibrations/{calibration_id}",
+        headers=headers
+    )
+    assert response.status_code == 404, "Calibration still exists after delete"
+    
+    print(f"✓ Calibration deleted successfully")
+    return True
+
 def main():
     """Run all API tests"""
     print("\n" + "#"*80)
@@ -252,9 +352,27 @@ def main():
         # Test 7: List robot poses
         if poses_imported:
             poses = test_list_robot_poses(token, calibration_id)
-        
+            
         # Test 8: Get calibration detail
         detail = test_get_calibration_detail(token, calibration_id)
+        
+        # Test 9: Add manual pose
+        test_add_robot_pose_manual(token, calibration_id)
+        
+        # Test 10: List images
+        if images_uploaded:
+            test_list_images(token, calibration_id)
+            
+        # Test 11: Execute calibration
+        # Only try if we have images and poses
+        if images_uploaded and poses_imported:
+            test_execute_calibration(token, calibration_id)
+            
+        # Test 12: Delete calibration
+        # Create a temporary one to delete so we keep the main one for inspection
+        print("\n--- Creating temporary calibration for delete test ---")
+        temp_cal = test_create_calibration(token)
+        test_delete_calibration(token, temp_cal['id'])
         
         # Summary
         print_section("SUMMARY")
@@ -265,12 +383,18 @@ def main():
         print(f"  ✓ POST /api/v1/calibrations")
         print(f"  ✓ GET  /api/v1/calibrations")
         print(f"  ✓ GET  /api/v1/calibrations/{{id}}")
+        print(f"  ✓ DELETE /api/v1/calibrations/{{id}}")
         
         if images_uploaded:
             print(f"  ✓ POST /api/v1/calibrations/{{id}}/upload-images")
+            print(f"  ✓ GET  /api/v1/calibrations/{{id}}/images")
         if poses_imported:
             print(f"  ✓ POST /api/v1/calibrations/{{id}}/import-robot-poses-csv")
             print(f"  ✓ GET  /api/v1/calibrations/{{id}}/robot-poses")
+            print(f"  ✓ POST /api/v1/calibrations/{{id}}/robot-poses (Manual)")
+            
+        if images_uploaded and poses_imported:
+             print(f"  ✓ POST /api/v1/calibrations/{{id}}/execute")
         
         print(f"\n📊 Test calibration created with ID: {calibration_id}")
         print(f"🌐 View in Swagger UI: {BASE_URL}/docs#{'/calibrations' if calibration_id else ''}")

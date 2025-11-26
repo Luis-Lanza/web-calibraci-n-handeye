@@ -12,6 +12,7 @@ from ..database import Base
 class CalibrationStatus(str, enum.Enum):
     """Status of a calibration run."""
     PENDING = "pending"
+    PROCESSING = "processing"
     COMPLETED = "completed"
     FAILED = "failed"
 

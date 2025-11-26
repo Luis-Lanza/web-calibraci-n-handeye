@@ -436,6 +436,9 @@ def execute_calibration(
                 success=False,
                 calibration_id=calibration_id,
                 transformation_matrix=None,
+                reprojection_error=None,
+                rotation_error_deg=None,
+                translation_error_mm=None,
                 poses_processed=0,
                 poses_valid=0,
                 error_message=result.get('error_message', 'Calibration failed')
@@ -443,13 +446,19 @@ def execute_calibration(
             
     except Exception as e:
         # Mark as failed
-        calibration.status = CalibrationStatus.FAILED
-        db.commit()
+        try:
+            calibration.status = CalibrationStatus.FAILED
+            db.commit()
+        except:
+            db.rollback()
         
         return CalibrationExecuteResponse(
             success=False,
             calibration_id=calibration_id,
             transformation_matrix=None,
+            reprojection_error=None,
+            rotation_error_deg=None,
+            translation_error_mm=None,
             poses_processed=0,
             poses_valid=0,
             error_message=str(e)
