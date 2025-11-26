@@ -46,19 +46,17 @@ class ChArUcoDetector:
         dict_id = getattr(cv2.aruco, dictionary_name)
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(dict_id)
         
-        # Create ChArUco board
+        # Create ChArUco board (same as user's code)
         self.board = cv2.aruco.CharucoBoard(
-            (squares_x, squares_y),
-            square_length,
-            marker_length,
-            self.aruco_dict
+            size=(squares_x, squares_y),  # Use size parameter like user's code
+            squareLength=square_length,
+            markerLength=marker_length,
+            dictionary=self.aruco_dict
         )
         
-        # Detector parameters
+        # Detector parameters (same as user's code)
         self.detector_params = cv2.aruco.DetectorParameters()
-        
-        # Refine strategy for better detection
-        self.refine_params = cv2.aruco.RefineParameters()
+
     
     def detect_charuco(self, image: np.ndarray) -> Dict:
         """
@@ -83,10 +81,10 @@ class ChArUcoDetector:
         else:
             gray = image
         
-        # Detect ArUco markers
+        # Detect ArUco markers (same as user's code)
         marker_corners, marker_ids, rejected = cv2.aruco.detectMarkers(
             gray, 
-            self.aruco_dict,
+            self.aruco_dict, 
             parameters=self.detector_params
         )
         
@@ -101,17 +99,17 @@ class ChArUcoDetector:
             'marker_ids': marker_ids
         }
         
-        # If at least one marker detected, interpolate ChArUco corners
+        # If at least one marker detected, interpolate ChArUco corners (same as user's code)
         if marker_ids is not None and len(marker_ids) > 0:
             # Interpolate CharUco corners
-            num_corners, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(
-                marker_corners,
-                marker_ids,
-                gray,
-                self.board
+            retval, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(
+                markerCorners=marker_corners,
+                markerIds=marker_ids,
+                image=gray,
+                board=self.board
             )
             
-            if charuco_corners is not None and charuco_ids is not None:
+            if retval is not None and charuco_corners is not None and len(charuco_corners) > 3:
                 result['detected'] = True
                 result['corners'] = charuco_corners
                 result['ids'] = charuco_ids
@@ -159,15 +157,15 @@ class ChArUcoDetector:
         if detection['num_corners'] < 4:
             return result
         
-        # Estimate pose using ChArUco corners
+        # Estimate pose using ChArUco corners (same as user's code)
         success, rvec, tvec = cv2.aruco.estimatePoseCharucoBoard(
-            detection['corners'],
-            detection['ids'],
-            self.board,
-            camera_matrix,
-            dist_coeffs,
-            None,
-            None
+            charucoCorners=detection['corners'],
+            charucoIds=detection['ids'],
+            board=self.board,
+            cameraMatrix=camera_matrix,
+            distCoeffs=dist_coeffs,
+            rvec=None,
+            tvec=None
         )
         
         if success:

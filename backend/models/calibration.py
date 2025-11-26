@@ -31,6 +31,8 @@ class CalibrationRun(Base):
     __tablename__ = "calibration_runs"
     
     id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(200), nullable=False)  # Calibration name
+    description = Column(String(1000), nullable=True)  # Optional description
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
     algorithm_params_id = Column(Integer, ForeignKey("algorithm_parameters.id"), nullable=False)

@@ -4,7 +4,7 @@ FastAPI main application entry point.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.config import settings
-from backend.api import auth_router
+from backend.api import auth_router, calibrations_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -23,6 +23,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth_router, prefix="/api/v1", tags=["authentication"])
+app.include_router(calibrations_router, prefix="/api/v1", tags=["calibrations"])
 
 
 @app.get("/")
