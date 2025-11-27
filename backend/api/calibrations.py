@@ -29,6 +29,7 @@ from backend.utils.file_utils import (
     parse_robot_poses_csv,
     get_image_dimensions
 )
+from backend.config import settings
 from backend.calibration import CalibrationService
 from backend.calibration.transformations import euler_to_rotation_matrix
 
@@ -193,23 +194,54 @@ async def upload_images(
             # Get image dimensions
             width, height = get_image_dimensions(saved_path)
             
+            # Detect ChArUco and create annotated image
+            from backend.utils.charuco_detector import detect_and_annotate_charuco
+            from pathlib import Path
+            
+            annotated_dir = Path(settings.UPLOAD_DIR) / f"calibration_{calibration_id}" / "annotated"
+            annotated_path = annotated_dir / f"img_{idx:02d}_annotated{Path(file.filename).suffix}"
+            
+            detected, corners_count, ids_count, corners_data, ids_data = detect_and_annotate_charuco(
+                image_path=saved_path,
+                output_path=annotated_path,
+                squares_x=calibration.charuco_squares_x,
+                squares_y=calibration.charuco_squares_y,
+                square_length=calibration.charuco_square_length,
+                marker_length=calibration.charuco_marker_length,
+                dictionary_name=calibration.charuco_dictionary
+            )
+            
             # Create database record
             calib_image = CalibrationImage(
                 calibration_run_id=calibration_id,
                 pose_index=idx,
                 image_path=str(saved_path),
+                annotated_image_path=str(annotated_path) if annotated_path.exists() else None,
                 original_filename=file.filename,
                 file_size_bytes=saved_path.stat().st_size if saved_path.exists() else 0,
                 image_width=width,
-                image_height=height
+                image_height=height,
+                charuco_detected=detected,
+                corners_detected=corners_count,
+                ids_detected=ids_count,
+                charuco_corners=corners_data,
+                charuco_ids=ids_data
             )
             
             db.add(calib_image)
             uploaded_filenames.append(file.filename)
             
         except HTTPException as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"HTTPException uploading {file.filename}: {e.detail}")
             errors.append(f"{file.filename}: {e.detail}")
         except Exception as e:
+            import logging
+            import traceback
+            logger = logging.getLogger(__name__)
+            logger.error(f"Exception uploading {file.filename}: {str(e)}")
+            logger.error(traceback.format_exc())
             errors.append(f"{file.filename}: {str(e)}")
     
     db.commit()
@@ -393,27 +425,55 @@ def execute_calibration(
     Processes images, detects ChArUco boards, calculates camera poses,
     and runs Tsai-Lenz algorithm.
     """
+    print(f"🚀 Executing calibration {calibration_id}")
+    
     calibration = db.query(CalibrationRun).filter(CalibrationRun.id == calibration_id).first()
     if not calibration:
+        print(f"❌ Calibration {calibration_id} not found")
         raise HTTPException(status_code=404, detail="Calibration not found")
     
+    print(f"✅ Calibration found, status: {calibration.status}")
+    
     if calibration.user_id != current_user.id and current_user.role.value not in ["engineer", "supervisor"]:
+        print(f"❌ User {current_user.id} not authorized")
         raise HTTPException(status_code=403, detail="Not authorized")
     
     if calibration.status != CalibrationStatus.PENDING:
+        print(f"❌ Invalid status: {calibration.status.value}, expected PENDING")
         raise HTTPException(
             status_code=400,
             detail=f"Cannot execute calibration with status {calibration.status.value}"
         )
     
+    # Check if we have images and poses
+    images_count = db.query(CalibrationImage).filter(CalibrationImage.calibration_run_id == calibration_id).count()
+    poses_count = db.query(RobotPose).filter(RobotPose.calibration_run_id == calibration_id).count()
+    
+    print(f"📊 Images: {images_count}, Poses: {poses_count}")
+    
+    if images_count == 0:
+        print(f"❌ No images uploaded")
+        raise HTTPException(status_code=400, detail="No images uploaded for this calibration")
+    
+    if poses_count == 0:
+        print(f"❌ No robot poses uploaded")
+        raise HTTPException(status_code=400, detail="No robot poses uploaded for this calibration")
+    
+    if images_count != poses_count:
+        print(f"⚠️  Warning: Images ({images_count}) != Poses ({poses_count})")
+    
     # Update status to processing
+    print(f"🔄 Updating status to PROCESSING")
     calibration.status = CalibrationStatus.PROCESSING
     db.commit()
     
     # Execute calibration using service
     try:
+        print(f"⚙️  Starting calibration service")
         service = CalibrationService(db)
         result = service.process_calibration_run(calibration_id)
+        
+        print(f"📊 Service result: {result}")
         
         if result['success']:
             return CalibrationExecuteResponse(

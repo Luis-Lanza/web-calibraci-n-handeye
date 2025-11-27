@@ -21,39 +21,132 @@ def results_page() -> rx.Component:
             rx.cond(
                 CalibrationState.calibration["status"] == "completed",
                 rx.vstack(
+                    # Success badge
+                    rx.callout(
+                        "Calibración completada exitosamente",
+                        icon="check",
+                        color_scheme="green",
+                        size="2",
+                    ),
+                    
+                    # Transformation Matrix
                     rx.box(
                         rx.vstack(
-                            rx.heading("Matriz de Transformación (Hand-Eye)", size="4"),
-                            rx.code_block(
-                                str(CalibrationState.calibration["transformation_matrix"]),
-                                language="json",
+                            rx.heading("Matriz de Transformación Hand-Eye (4×4)", size="4", margin_bottom="2", color=ColorPalette.GRAY_800),
+                            rx.text(
+                                CalibrationState.calibration["method"],
+                                size="2",
+                                color=ColorPalette.GRAY_600,
+                                margin_bottom="4",
                             ),
+                            
+                            # Matrix formatted nicely
+                            rx.box(
+                                CalibrationState.matrix_formatted,
+                                style={
+                                    "white_space": "pre",
+                                    "font_family": "monospace",
+                                    "font_size": "15px",
+                                    "font_weight": "500",
+                                    "background": "#ffffff",
+                                    "padding": "24px",
+                                    "border_radius": "8px",
+                                    "border": f"2px solid {ColorPalette.PRIMARY}",
+                                    "line_height": "2.0",
+                                    "color": ColorPalette.GRAY_800,
+                                },
+                            ),
+                            
+                            align_items="start",
                         ),
                         style=CARD_STYLE,
                         width="100%",
                     ),
                     
+                    # Metrics Grid
                     rx.grid(
+                        # Reprojection Error
                         rx.box(
                             rx.vstack(
-                                rx.heading("Error de Reproyección", size="3"),
-                                rx.heading(f"{CalibrationState.calibration['reprojection_error']:.4f}", size="6", color=ColorPalette.PRIMARY),
-                                rx.text("pixels", size="1"),
+                                rx.text("Error de Reproyección", size="2", weight="bold", color=ColorPalette.GRAY_700),
+                                rx.heading(
+                                    CalibrationState.reprojection_error_formatted,
+                                    size="7",
+                                    color=ColorPalette.PRIMARY
+                                ),
+                                rx.text("mm", size="2", color=ColorPalette.GRAY_600),
+                                align_items="center",
+                                spacing="1",
                             ),
                             style=CARD_STYLE,
-                            align_items="center",
                         ),
-                        columns="3",
+                        
+                        # Rotation Error
+                        rx.box(
+                            rx.vstack(
+                                rx.text("Error de Rotación", size="2", weight="bold", color=ColorPalette.GRAY_700),
+                                rx.heading(
+                                    CalibrationState.rotation_error_formatted,
+                                    size="7",
+                                    color=ColorPalette.SECONDARY
+                                ),
+                                rx.text("grados", size="2", color=ColorPalette.GRAY_600),
+                                align_items="center",
+                                spacing="1",
+                            ),
+                            style=CARD_STYLE,
+                        ),
+                        
+                        # Translation Error
+                        rx.box(
+                            rx.vstack(
+                                rx.text("Error de Traslación", size="2", weight="bold", color=ColorPalette.GRAY_700),
+                                rx.heading(
+                                    CalibrationState.translation_error_formatted,
+                                    size="7",
+                                    color=ColorPalette.ACCENT
+                                ),
+                                rx.text("mm", size="2", color=ColorPalette.GRAY_600),
+                                align_items="center",
+                                spacing="1",
+                            ),
+                            style=CARD_STYLE,
+                        ),
+                        
+                        # Poses Processed
+                        rx.box(
+                            rx.vstack(
+                                rx.text("Poses Procesadas", size="2", weight="bold", color=ColorPalette.GRAY_700),
+                                rx.heading(
+                                    CalibrationState.poses_summary,
+                                    size="7",
+                                    color=ColorPalette.PRIMARY
+                                ),
+                                rx.text("válidas", size="2", color=ColorPalette.GRAY_600),
+                                align_items="center",
+                                spacing="1",
+                            ),
+                            style=CARD_STYLE,
+                        ),
+                        
+                        columns="4",
                         spacing="4",
                         width="100%",
                     ),
+                    
                     spacing="6",
                     width="100%",
                 ),
                 rx.center(
                     rx.vstack(
-                        rx.heading("Calibración Fallida o Pendiente", size="5", color="red"),
-                        rx.text("Revisa los logs o intenta nuevamente."),
+                        rx.callout(
+                            "Calibración fallida o pendiente",
+                            icon="triangle-alert",
+                            color_scheme="red",
+                            size="2",
+                        ),
+                        rx.text("Revisa los logs o intenta nuevamente.", color=ColorPalette.GRAY_600),
+                        spacing="3",
                     ),
                     padding="10",
                 ),

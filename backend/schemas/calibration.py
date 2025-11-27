@@ -38,6 +38,11 @@ class CalibrationRunResponse(BaseModel):
     charuco_dictionary: str
     transformation_matrix: Optional[List[List[float]]]
     reprojection_error: Optional[float]
+    rotation_error_deg: Optional[float]
+    translation_error_mm: Optional[float]
+    poses_valid: Optional[int]
+    poses_processed: Optional[int]
+    method: Optional[str]
     robot_poses_input_method: Optional[str]
     csv_filename: Optional[str]
     created_at: datetime
@@ -82,6 +87,7 @@ class CalibrationImageResponse(BaseModel):
     calibration_run_id: int
     pose_index: int
     image_path: str
+    annotated_image_path: Optional[str]
     original_filename: str
     uploaded_at: datetime
     file_size_bytes: int

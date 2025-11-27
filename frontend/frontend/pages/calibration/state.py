@@ -156,9 +156,73 @@ class CalibrationState(AuthState):
         if response.status_code == 200:
             result = response.json()
             if result["success"]:
+                # Update calibration with results
+                self.calibration.update(result)
+                self.calibration["status"] = "completed"
                 await self.load_calibration()
                 return rx.redirect(f"/calibration/{self.current_calibration_id}/results")
             else:
                 return rx.window_alert(f"Error: {result.get('error_message')}")
         else:
             return rx.window_alert("Error de servidor al ejecutar calibración")
+
+    @rx.var
+    def matrix_formatted(self) -> str:
+        """Format transformation matrix as readable text."""
+        if not self.calibration or "transformation_matrix" not in self.calibration:
+            return "No hay matriz disponible"
+        
+        matrix = self.calibration.get("transformation_matrix", [[0]*4]*4)
+        try:
+            lines = []
+            for row in matrix:
+                formatted_row = "  ".join(f"{val:10.6f}" for val in row)
+                lines.append(formatted_row)
+            return "\n".join(lines)
+        except (TypeError, ValueError, KeyError):
+            return str(matrix)
+    
+    @rx.var
+    def rotation_error_formatted(self) -> str:
+        """Format rotation error."""
+        if not self.calibration:
+            return "0.00"
+        try:
+            val = self.calibration.get("rotation_error_deg", 0)
+            return f"{float(val):.2f}"
+        except (TypeError, ValueError):
+            return "0.00"
+    
+    @rx.var
+    def translation_error_formatted(self) -> str:
+        """Format translation error."""
+        if not self.calibration:
+            return "0.00"
+        try:
+            val = self.calibration.get("translation_error_mm", 0)
+            return f"{float(val):.2f}"
+        except (TypeError, ValueError):
+            return "0.00"
+    
+    @rx.var
+    def reprojection_error_formatted(self) -> str:
+        """Format reprojection error."""
+        if not self.calibration:
+            return "0.00"
+        try:
+            val = self.calibration.get("reprojection_error", 0)
+            return f"{float(val):.2f}"
+        except (TypeError, ValueError):
+            return "0.00"
+    
+    @rx.var
+    def poses_summary(self) -> str:
+        """Format poses processed summary."""
+        if not self.calibration:
+            return "0/0"
+        try:
+            valid = self.calibration.get("poses_valid", 0)
+            total = self.calibration.get("poses_processed", 0)
+            return f"{valid}/{total}"
+        except (TypeError, ValueError):
+            return "0/0"

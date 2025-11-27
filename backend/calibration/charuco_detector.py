@@ -81,12 +81,9 @@ class ChArUcoDetector:
         else:
             gray = image
         
-        # Detect ArUco markers (same as user's code)
-        marker_corners, marker_ids, rejected = cv2.aruco.detectMarkers(
-            gray, 
-            self.aruco_dict, 
-            parameters=self.detector_params
-        )
+        # Detect ArUco markers using modern API
+        aruco_detector = cv2.aruco.ArucoDetector(self.aruco_dict, self.detector_params)
+        marker_corners, marker_ids, rejected = aruco_detector.detectMarkers(image)
         
         # Initialize result
         result = {
@@ -99,22 +96,21 @@ class ChArUcoDetector:
             'marker_ids': marker_ids
         }
         
-        # If at least one marker detected, interpolate ChArUco corners (same as user's code)
+        # If at least one marker detected, use CharucoDetector to get corners
         if marker_ids is not None and len(marker_ids) > 0:
-            # Interpolate CharUco corners
-            retval, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(
-                markerCorners=marker_corners,
-                markerIds=marker_ids,
-                image=gray,
-                board=self.board
-            )
-            
-            if retval is not None and charuco_corners is not None and len(charuco_corners) > 3:
-                result['detected'] = True
-                result['corners'] = charuco_corners
-                result['ids'] = charuco_ids
-                result['num_corners'] = len(charuco_corners)
-                result['num_ids'] = len(charuco_ids)
+            # Use CharucoDetector for modern OpenCV (4.7+)
+            try:
+                charuco_detector = cv2.aruco.CharucoDetector(self.board)
+                charuco_corners, charuco_ids, _, _ = charuco_detector.detectBoard(image)
+                
+                if charuco_corners is not None and len(charuco_corners) > 3:
+                    result['detected'] = True
+                    result['corners'] = charuco_corners
+                    result['ids'] = charuco_ids
+                    result['num_corners'] = len(charuco_corners)
+                    result['num_ids'] = len(charuco_ids) if charuco_ids is not None else 0
+            except Exception as e:
+                print(f"⚠️  CharucoDetector failed in calibration service: {e}")
         
         return result
     
@@ -157,16 +153,42 @@ class ChArUcoDetector:
         if detection['num_corners'] < 4:
             return result
         
-        # Estimate pose using ChArUco corners (same as user's code)
-        success, rvec, tvec = cv2.aruco.estimatePoseCharucoBoard(
-            charucoCorners=detection['corners'],
-            charucoIds=detection['ids'],
-            board=self.board,
-            cameraMatrix=camera_matrix,
-            distCoeffs=dist_coeffs,
-            rvec=None,
-            tvec=None
-        )
+        try:
+            # Get 3D object points for the detected ChArUco corners
+            # ChArUco corners are the inner corners of the chessboard squares
+            obj_points = self.board.getChessboardCorners()
+            
+            # Filter object points to match detected corner IDs
+            detected_ids = detection['ids'].flatten()
+            detected_corners = detection['corners'].reshape(-1, 2)
+            
+            # Get corresponding 3D points for detected corners
+            obj_points_filtered = []
+            img_points_filtered = []
+            
+            for i, corner_id in enumerate(detected_ids):
+                if corner_id < len(obj_points):
+                    obj_points_filtered.append(obj_points[corner_id])
+                    img_points_filtered.append(detected_corners[i])
+            
+            if len(obj_points_filtered) < 4:
+                return result
+            
+            obj_points_np = np.array(obj_points_filtered, dtype=np.float32)
+            img_points_np = np.array(img_points_filtered, dtype=np.float32)
+            
+            # Estimate pose using solvePnP (modern API)
+            success, rvec, tvec = cv2.solvePnP(
+                obj_points_np,
+                img_points_np,
+                camera_matrix,
+                dist_coeffs,
+                flags=cv2.SOLVEPNP_ITERATIVE
+            )
+        
+        except Exception as e:
+            print(f"⚠️  Pose estimation failed: {e}")
+            return result
         
         if success:
             # Convert rvec to rotation matrix

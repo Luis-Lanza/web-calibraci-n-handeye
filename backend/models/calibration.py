@@ -52,6 +52,11 @@ class CalibrationRun(Base):
     # Results (stored as JSON for the 4x4 transformation matrix)
     transformation_matrix = Column(JSON, nullable=True)  # 4x4 homogeneous transformation matrix
     reprojection_error = Column(Float, nullable=True)
+    rotation_error_deg = Column(Float, nullable=True)  # Rotation error in degrees
+    translation_error_mm = Column(Float, nullable=True)  # Translation error in mm
+    poses_valid = Column(Integer, nullable=True)  # Number of valid poses used
+    poses_processed = Column(Integer, nullable=True)  # Total number of poses processed
+    method = Column(String(50), nullable=True)  # Calibration method used (e.g., "Tsai-Lenz")
     status = Column(SQLEnum(CalibrationStatus), default=CalibrationStatus.PENDING, nullable=False)
     
     # Additional metadata
@@ -142,6 +147,7 @@ class CalibrationImage(Base):
     
     # File metadata
     image_path = Column(String(500), nullable=False)  # Relative path to uploaded image
+    annotated_image_path = Column(String(500), nullable=True)  # Path to annotated image with ChArUco detection
     original_filename = Column(String(255), nullable=False)
     uploaded_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     file_size_bytes = Column(Integer, nullable=False)
@@ -152,6 +158,8 @@ class CalibrationImage(Base):
     charuco_detected = Column(Boolean, default=False, nullable=False)  # Was board detected?
     corners_detected = Column(Integer, nullable=True)  # Number of corners detected
     ids_detected = Column(Integer, nullable=True)  # Number of ArUco IDs detected
+    charuco_corners = Column(JSON, nullable=True)  # Detected corner coordinates (2D points)
+    charuco_ids = Column(JSON, nullable=True)  # Detected corner IDs
     
     # Link to computed camera pose
     camera_pose_id = Column(Integer, ForeignKey("camera_poses.id"), nullable=True)  # Set after processing

@@ -61,13 +61,29 @@ def images_page() -> rx.Component:
                         CalibrationState.images,
                         lambda img: rx.box(
                             rx.image(
-                                src=f"http://localhost:8000/{img['image_path']}", 
+                                # Use annotated image if available, otherwise original
+                                src=rx.cond(
+                                    img["annotated_image_path"],
+                                    "http://localhost:8000/" + img["annotated_image_path"].to(str),
+                                    "http://localhost:8000/" + img["image_path"].to(str)
+                                ),
                                 width="100%", 
                                 height="auto", 
                                 border_radius="md",
                                 alt=img['original_filename']
                             ),
-                            rx.text(img['original_filename'], size="1", color=ColorPalette.GRAY_600, margin_top="1"),
+                            rx.hstack(
+                                rx.text(img['original_filename'], size="1", color=ColorPalette.GRAY_600),
+                                rx.cond(
+                                    img["charuco_detected"],
+                                    rx.badge("✓ " + img["corners_detected"].to(str) + " corners", color_scheme="green", size="1"),
+                                    rx.badge("✗ No detectado", color_scheme="red", size="1"),
+                                ),
+                                spacing="2",
+                                justify="between",
+                                width="100%",
+                                margin_top="2",
+                            ),
                             style=CARD_STYLE,
                         )
                     ),

@@ -50,13 +50,13 @@ async def save_uploaded_image(
     upload_dir: Path = None
 ) -> Path:
     """
-    Save uploaded image to disk with structured filename.
+    Save uploaded image to disk with structured filename and directory.
     
     Args:
         file: Uploaded file
         calibration_id: ID of calibration run
         pose_index: Index of pose (for filename)
-        upload_dir: Upload directory (default: from settings)
+        upload_dir: Base upload directory (default: from settings)
         
     Returns:
         Relative path to saved file
@@ -64,13 +64,14 @@ async def save_uploaded_image(
     if upload_dir is None:
         upload_dir = Path(settings.UPLOAD_DIR)
     
-    # Create directory if it doesn't exist
-    upload_dir.mkdir(parents=True, exist_ok=True)
+    # Create calibration-specific subdirectory
+    calib_dir = upload_dir / f"calibration_{calibration_id}"
+    calib_dir.mkdir(parents=True, exist_ok=True)
     
     # Generate filename
     ext = Path(file.filename).suffix.lower()
-    filename = f"calib_{calibration_id}_img_{pose_index:02d}{ext}"
-    filepath = upload_dir / filename
+    filename = f"img_{pose_index:02d}{ext}"
+    filepath = calib_dir / filename
     
     # Save file
     contents = await file.read()
@@ -78,7 +79,7 @@ async def save_uploaded_image(
         f.write(contents)
     
     # Return relative path (relative to project root)
-    return Path(settings.UPLOAD_DIR) / filename
+    return filepath
 
 
 def parse_robot_poses_csv(file_content: bytes) -> List[Dict]:

@@ -5,17 +5,21 @@ import reflex as rx
 class ColorPalette:
     """Discreet Palette"""
     PRIMARY = "#a275c2"      # Lavanda vibrante
-    SECONDARY = "#8866a0"    # Lavanda más oscuro (mejorado)
+    SECONDARY = "#8866a0"    # Lavanda más oscuro
     BACKGROUND = "#fdf7ff"   # Blanco lavanda
     ACCENT = "#d5cabd"       # Beige/Taupe
-    GRAY_800 = "#2d3748"     # Gris oscuro para texto
+    GRAY_800 = "#1a202c"     # Gris muy oscuro para texto (mejor contraste)
+    GRAY_700 = "#2d3748"     # Gris oscuro para texto
     GRAY_600 = "#4a5568"     # Gris medio para texto secundario
-    GRAY_400 = "#a0aec0"     # Gris claro para bordes
+    GRAY_400 = "#718096"     # Gris medio para bordes/elementos visibles
+    SUCCESS = "#48bb78"      # Verde para éxito
+    ERROR = "#f56565"        # Rojo para error
 
 
 STYLES = {
     "font_family": "Inter, system-ui, sans-serif",
     "background_color": ColorPalette.BACKGROUND,
+    "color": ColorPalette.GRAY_800,  # Default text color - dark for readability
 }
 
 BUTTON_STYLE = {
@@ -49,9 +53,13 @@ CARD_STYLE = {
 }
 
 TEXT_SECONDARY = {
-    "color": ColorPalette.GRAY_600,
+    "color": ColorPalette.GRAY_700,  # Darker for better contrast
 }
 
 TEXT_MUTED = {
-    "color": ColorPalette.GRAY_400,
+    "color": ColorPalette.GRAY_600,  # Darker for better contrast
+}
+
+HEADING_STYLE = {
+    "color": ColorPalette.GRAY_800,  # Dark headings by default
 }
