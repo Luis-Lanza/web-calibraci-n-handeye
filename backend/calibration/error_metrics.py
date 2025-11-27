@@ -37,29 +37,57 @@ def calculate_reprojection_error(
     rotation_errors = []
     translation_errors = []
     
+    # Calculate T_target_base for each pose pair
+    # For Eye-in-Hand: T_target_base = A * X * B
+    # Where A = T_gripper_base, X = T_cam_gripper, B = T_target_cam
+    
+    T_target_base_list = []
+    
     for A, B in zip(robot_poses, camera_poses):
-        # Calculate: A*X and X*B
-        AX = A @ X
-        XB = X @ B
+        # Calculate T = A @ X @ B
+        T = A @ X @ B
+        T_target_base_list.append(T)
+    
+    # Calculate mean transformation
+    # For translation, just mean
+    translations = np.array([T[:3, 3] for T in T_target_base_list])
+    mean_translation = np.mean(translations, axis=0)
+    
+    # For rotation, we need a proper mean (using chordal L2 mean or similar)
+    # Simple approximation: convert to rotation vectors, mean, back to matrix
+    # Or just pick the first one as reference for error calculation (common in simple implementations)
+    # Better: Use the first pose as reference to measure deviation
+    ref_T = T_target_base_list[0]
+    ref_R = ref_T[:3, :3]
+    ref_t = ref_T[:3, 3]
+    
+    # Calculate deviations from the first pose (or mean)
+    # Let's use the mean translation for translation error
+    # And the first rotation as reference for rotation error (simplifies averaging)
+    
+    for T in T_target_base_list:
+        R_curr = T[:3, :3]
+        t_curr = T[:3, 3]
         
-        # Frobenius norm of difference
-        error = np.linalg.norm(AX - XB, 'fro')
-        individual_errors.append(error)
+        # Rotation error relative to reference
+        rot_error = calculate_rotation_error(ref_R, R_curr)
         
-        # Separate rotation and translation errors
-        rot_error = calculate_rotation_error(AX[:3, :3], XB[:3, :3])
-        trans_error = calculate_translation_error(AX[:3, 3], XB[:3, 3])
+        # Translation error relative to mean
+        trans_error = calculate_translation_error(mean_translation, t_curr)
         
         rotation_errors.append(rot_error)
         translation_errors.append(trans_error)
+        
+        # Combined error (heuristic)
+        individual_errors.append(trans_error + rot_error) # Mixing units, but useful for relative comparison
     
     individual_errors = np.array(individual_errors)
     
     return {
-        'mean_error': float(np.mean(individual_errors)),
-        'std_error': float(np.std(individual_errors)),
-        'max_error': float(np.max(individual_errors)),
-        'min_error': float(np.min(individual_errors)),
+        'mean_error': float(np.mean(translation_errors)), # Use translation error as main metric
+        'std_error': float(np.std(translation_errors)),
+        'max_error': float(np.max(translation_errors)),
+        'min_error': float(np.min(translation_errors)),
         'individual_errors': individual_errors.tolist(),
         'rotation_errors_deg': rotation_errors,
         'translation_errors_mm': translation_errors,

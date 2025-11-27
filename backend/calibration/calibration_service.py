@@ -128,7 +128,13 @@ class CalibrationService:
             robot_diversity = calculate_pose_diversity(robot_poses_matrices)
             
             # Save results to database
-            self._save_results(calib_run, calib_result, error_metrics)
+            self._save_results(
+                calib_run, 
+                calib_result, 
+                error_metrics,
+                len(robot_poses_matrices),
+                len(camera_poses_matrices)
+            )
             
             return {
                 'success': True,
@@ -273,13 +279,20 @@ class CalibrationService:
         self,
         calib_run: CalibrationRun,
         calib_result: Dict,
-        error_metrics: Dict
+        error_metrics: Dict,
+        poses_processed: int,
+        poses_valid: int
     ) -> None:
         """Save calibration results to database."""
         
         # Update calibration run with results
         calib_run.transformation_matrix = calib_result['X'].tolist()
         calib_run.reprojection_error = error_metrics['mean_error']
+        calib_run.rotation_error_deg = error_metrics['mean_rotation_error_deg']
+        calib_run.translation_error_mm = error_metrics['mean_translation_error_mm']
+        calib_run.poses_processed = poses_processed
+        calib_run.poses_valid = poses_valid
+        calib_run.method = calib_result['method_name']
         calib_run.status = CalibrationStatus.COMPLETED
         
         self.db.commit()
