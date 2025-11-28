@@ -31,9 +31,14 @@ class User(Base):
     username = Column(String(50), unique=True, nullable=False, index=True)
     email = Column(String(100), unique=True, nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
-    role = Column(SQLEnum(UserRole), nullable=False, default=UserRole.TECHNICIAN)
+    role = Column(SQLEnum(UserRole), default=UserRole.TECHNICIAN, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    # MFA fields
+    mfa_enabled = Column(Boolean, default=False, nullable=False)
+    mfa_code = Column(String(6), nullable=True)  # Temporary 6-digit code
+    mfa_code_expires_at = Column(DateTime, nullable=True)
     
     # Relationships
     calibration_runs = relationship("CalibrationRun", back_populates="user", cascade="all, delete-orphan")

@@ -142,6 +142,35 @@ def delete_calibration(
     db.commit()
 
 
+@router.get("/calibrations/{calibration_id}/report")
+def get_calibration_report(
+    calibration_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Generate and download PDF report."""
+    calibration = db.query(CalibrationRun).filter(CalibrationRun.id == calibration_id).first()
+    
+    if not calibration:
+        raise HTTPException(status_code=404, detail="Calibration not found")
+        
+    # Generate PDF
+    from ..services.report_service import ReportService
+    pdf_content = ReportService.generate_calibration_report(calibration)
+    
+    # Return as streaming response
+    from fastapi.responses import StreamingResponse
+    import io
+    
+    return StreamingResponse(
+        io.BytesIO(pdf_content),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=report_calibration_{calibration_id}.pdf"
+        }
+    )
+
+
 # ============================================================================
 # Image Upload
 # ============================================================================

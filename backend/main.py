@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from backend.config import settings
-from backend.api import auth_router, calibrations_router
+from backend.api import auth_router, calibrations_router, mfa_router
 import os
 
 app = FastAPI(
@@ -33,6 +33,7 @@ app.mount("/uploads", StaticFiles(directory=uploads_base_dir), name="uploads")
 # Include routers
 app.include_router(auth_router, prefix="/api/v1", tags=["authentication"])
 app.include_router(calibrations_router, prefix="/api/v1", tags=["calibrations"])
+app.include_router(mfa_router, prefix="/api/v1/mfa", tags=["mfa"])
 
 
 @app.get("/")

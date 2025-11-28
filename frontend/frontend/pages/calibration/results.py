@@ -10,6 +10,13 @@ def results_page() -> rx.Component:
                 rx.heading("Resultados de Calibración", size="6", color=ColorPalette.PRIMARY),
                 rx.spacer(),
                 rx.button(
+                    "Descargar Reporte PDF",
+                    on_click=CalibrationState.download_report,
+                    variant="solid",
+                    color_scheme="blue",
+                    margin_right="4",
+                ),
+                rx.button(
                     "Volver al Dashboard",
                     on_click=rx.redirect("/"),
                     variant="outline",
@@ -26,7 +33,9 @@ def results_page() -> rx.Component:
                         "Calibración completada exitosamente",
                         icon="check",
                         color_scheme="green",
+                        variant="soft",
                         size="2",
+                        style={"color": "#1b5e20", "background_color": "#e8f5e9", "border": "1px solid #c8e6c9"},
                     ),
                     
                     # Transformation Matrix

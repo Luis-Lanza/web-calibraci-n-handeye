@@ -14,6 +14,7 @@ from .pages.calibration.poses import poses_page
 from .pages.calibration.execute import execute_page
 from .pages.calibration.results import results_page
 from .pages.calibration.state import CalibrationState
+from .pages.settings import settings_page
 
 def index() -> rx.Component:
     return dashboard_page()
@@ -26,3 +27,4 @@ app.add_page(images_page, route="/calibration/[calibration_id]/images", on_load=
 app.add_page(poses_page, route="/calibration/[calibration_id]/poses", on_load=CalibrationState.load_calibration)
 app.add_page(execute_page, route="/calibration/[calibration_id]/execute", on_load=CalibrationState.load_calibration)
 app.add_page(results_page, route="/calibration/[calibration_id]/results", on_load=CalibrationState.load_calibration)
+app.add_page(settings_page, route="/settings")

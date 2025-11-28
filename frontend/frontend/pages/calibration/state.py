@@ -72,6 +72,8 @@ class CalibrationState(AuthState):
 
     async def load_calibration(self):
         """Load calibration data by ID."""
+        await self.check_auth()
+        
         # Get ID from URL params (handled by page load)
         # In Reflex, route args are available in self.router.page.params
         # But for now let's rely on the state variable being set or passed
@@ -226,3 +228,18 @@ class CalibrationState(AuthState):
             return f"{valid}/{total}"
         except (TypeError, ValueError):
             return "0/0"
+    
+    async def download_report(self):
+        """Download the calibration report."""
+        if not self.current_calibration_id:
+            return
+            
+        try:
+            content = await APIClient.download(f"/calibrations/{self.current_calibration_id}/report", token=self.token)
+            return rx.download(
+                data=content,
+                filename=f"report_calibration_{self.current_calibration_id}.pdf",
+            )
+        except Exception as e:
+            print(f"Download error: {e}")
+            return rx.window_alert("Error al descargar el reporte.")

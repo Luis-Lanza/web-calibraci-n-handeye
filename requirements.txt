@@ -25,6 +25,7 @@ opencv-python>=4.10.0
 # Visualización
 plotly>=5.18.0
 matplotlib>=3.9.0
+reportlab==4.0.8
 
 # Utilidades
 python-dotenv==1.0.0

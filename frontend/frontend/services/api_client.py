@@ -42,3 +42,13 @@ class APIClient:
             
         async with httpx.AsyncClient() as client:
             return await client.delete(f"{API_URL}{url}", headers=headers)
+
+    @staticmethod
+    async def download(url: str, token: Optional[str] = None) -> bytes:
+        headers = {}
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+            
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{API_URL}{url}", headers=headers)
+            return response.content

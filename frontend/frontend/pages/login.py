@@ -30,6 +30,20 @@ def login_page() -> rx.Component:
                             style=INPUT_STYLE,
                             width="100%",
                         ),
+                        rx.cond(
+                            AuthState.mfa_required,
+                            rx.vstack(
+                                rx.text("Código de Verificación (Email)", size="2", color=ColorPalette.PRIMARY, weight="bold"),
+                                rx.input(
+                                    placeholder="Código de 6 dígitos",
+                                    name="mfa_code",
+                                    style=INPUT_STYLE,
+                                    width="100%",
+                                ),
+                                spacing="2",
+                                width="100%",
+                            ),
+                        ),
                         rx.button(
                             "Entrar",
                             type="submit",

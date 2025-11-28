@@ -8,6 +8,10 @@ def navbar() -> rx.Component:
             rx.heading("Hand-Eye Calibration", size="5", color="white"),
             rx.spacer(),
             rx.hstack(
+                rx.cond(
+                    AuthState.is_engineer,
+                    rx.link("Configuración", href="/settings", color="white", font_weight="medium"),
+                ),
                 rx.text(AuthState.user["username"], color="white"),
                 rx.button(
                     "Salir",

@@ -85,13 +85,13 @@ def poses_page() -> rx.Component:
                         rx.foreach(
                             CalibrationState.poses,
                             lambda pose: rx.table.row(
-                                rx.table.cell(pose["pose_index"]),
-                                rx.table.cell(pose["x"]),
-                                rx.table.cell(pose["y"]),
-                                rx.table.cell(pose["z"]),
-                                rx.table.cell(pose["rx"]),
-                                rx.table.cell(pose["ry"]),
-                                rx.table.cell(pose["rz"]),
+                                rx.table.cell(pose["pose_index"], color=ColorPalette.GRAY_800),
+                                rx.table.cell(pose["x"], color=ColorPalette.GRAY_800),
+                                rx.table.cell(pose["y"], color=ColorPalette.GRAY_800),
+                                rx.table.cell(pose["z"], color=ColorPalette.GRAY_800),
+                                rx.table.cell(pose["rx"], color=ColorPalette.GRAY_800),
+                                rx.table.cell(pose["ry"], color=ColorPalette.GRAY_800),
+                                rx.table.cell(pose["rz"], color=ColorPalette.GRAY_800),
                             )
                         )
                     ),
