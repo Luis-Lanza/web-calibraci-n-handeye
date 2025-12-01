@@ -32,6 +32,8 @@ from backend.utils.file_utils import (
 from backend.config import settings
 from backend.calibration import CalibrationService
 from backend.calibration.transformations import euler_to_rotation_matrix
+from backend.services.export_service import ExportService
+from fastapi.responses import Response
 
 router = APIRouter()
 
@@ -590,5 +592,74 @@ def list_camera_poses(
     camera_poses = db.query(CameraPose).filter(
         CameraPose.calibration_run_id == calibration_id
     ).order_by(CameraPose.pose_index).all()
-    
     return camera_poses
+
+
+# ============================================================================
+# Export Operations
+# ============================================================================
+
+@router.get("/calibrations/{calibration_id}/export/json")
+def export_json(
+    calibration_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Export calibration results as JSON."""
+    calibration = db.query(CalibrationRun).filter(CalibrationRun.id == calibration_id).first()
+    if not calibration:
+        raise HTTPException(status_code=404, detail="Calibration not found")
+    
+    json_content = ExportService.export_to_json(calibration)
+    
+    return Response(
+        content=json_content,
+        media_type="application/json",
+        headers={
+            "Content-Disposition": f"attachment; filename=calibration_{calibration_id}.json"
+        }
+    )
+
+
+@router.get("/calibrations/{calibration_id}/export/csv")
+def export_csv(
+    calibration_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Export calibration transformation matrix as CSV."""
+    calibration = db.query(CalibrationRun).filter(CalibrationRun.id == calibration_id).first()
+    if not calibration:
+        raise HTTPException(status_code=404, detail="Calibration not found")
+    
+    csv_content = ExportService.export_to_csv(calibration)
+    
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=calibration_{calibration_id}.csv"
+        }
+    )
+
+
+@router.get("/calibrations/{calibration_id}/export/txt")
+def export_txt(
+    calibration_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Export calibration results as human-readable text."""
+    calibration = db.query(CalibrationRun).filter(CalibrationRun.id == calibration_id).first()
+    if not calibration:
+        raise HTTPException(status_code=404, detail="Calibration not found")
+    
+    txt_content = ExportService.export_to_txt(calibration)
+    
+    return Response(
+        content=txt_content,
+        media_type="text/plain",
+        headers={
+            "Content-Disposition": f"attachment; filename=calibration_{calibration_id}.txt"
+        }
+    )

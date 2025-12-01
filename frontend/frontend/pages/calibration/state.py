@@ -243,3 +243,48 @@ class CalibrationState(AuthState):
         except Exception as e:
             print(f"Download error: {e}")
             return rx.window_alert("Error al descargar el reporte.")
+    
+    async def download_json(self):
+        """Download calibration results as JSON."""
+        if not self.current_calibration_id:
+            return
+            
+        try:
+            content = await APIClient.download(f"/calibrations/{self.current_calibration_id}/export/json", token=self.token)
+            return rx.download(
+                data=content,
+                filename=f"calibration_{self.current_calibration_id}.json",
+            )
+        except Exception as e:
+            print(f"Download error: {e}")
+            return rx.window_alert("Error al descargar JSON.")
+    
+    async def download_csv(self):
+        """Download calibration matrix as CSV."""
+        if not self.current_calibration_id:
+            return
+            
+        try:
+            content = await APIClient.download(f"/calibrations/{self.current_calibration_id}/export/csv", token=self.token)
+            return rx.download(
+                data=content,
+                filename=f"calibration_{self.current_calibration_id}.csv",
+            )
+        except Exception as e:
+            print(f"Download error: {e}")
+            return rx.window_alert("Error al descargar CSV.")
+    
+    async def download_txt(self):
+        """Download calibration summary as TXT."""
+        if not self.current_calibration_id:
+            return
+            
+        try:
+            content = await APIClient.download(f"/calibrations/{self.current_calibration_id}/export/txt", token=self.token)
+            return rx.download(
+                data=content,
+                filename=f"calibration_{self.current_calibration_id}.txt",
+            )
+        except Exception as e:
+            print(f"Download error: {e}")
+            return rx.window_alert("Error al descargar TXT.")

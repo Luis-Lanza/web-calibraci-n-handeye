@@ -9,12 +9,33 @@ def results_page() -> rx.Component:
             rx.hstack(
                 rx.heading("Resultados de Calibración", size="6", color=ColorPalette.PRIMARY),
                 rx.spacer(),
-                rx.button(
-                    "Descargar Reporte PDF",
-                    on_click=CalibrationState.download_report,
-                    variant="solid",
-                    color_scheme="blue",
-                    margin_right="4",
+                rx.menu.root(
+                    rx.menu.trigger(
+                        rx.button(
+                            "Exportar Resultados",
+                            variant="solid",
+                            color_scheme="blue",
+                        ),
+                    ),
+                    rx.menu.content(
+                        rx.menu.item(
+                            "Reporte PDF",
+                            on_click=CalibrationState.download_report,
+                        ),
+                        rx.menu.separator(),
+                        rx.menu.item(
+                            "JSON (Completo)",
+                            on_click=CalibrationState.download_json,
+                        ),
+                        rx.menu.item(
+                            "CSV (Matriz)",
+                            on_click=CalibrationState.download_csv,
+                        ),
+                        rx.menu.item(
+                            "TXT (Legible)",
+                            on_click=CalibrationState.download_txt,
+                        ),
+                    ),
                 ),
                 rx.button(
                     "Volver al Dashboard",
