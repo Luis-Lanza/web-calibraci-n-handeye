@@ -19,6 +19,17 @@ class CalibrationState(AuthState):
     square_len: float = 100.0
     marker_len: float = 75.0
     
+    # Camera Parameters (required - initialized with typical defaults)
+    camera_fx: float = 1000.0
+    camera_fy: float = 1000.0
+    camera_cx: float = 640.0
+    camera_cy: float = 480.0
+    camera_k1: float = 0.0
+    camera_k2: float = 0.0
+    camera_p1: float = 0.0
+    camera_p2: float = 0.0
+    camera_k3: float = 0.0
+    
     def set_new_cal_name(self, value: str):
         self.new_cal_name = value
         
@@ -49,6 +60,61 @@ class CalibrationState(AuthState):
         except ValueError:
             pass
     
+    # Camera parameter setters
+    def set_camera_fx(self, value: str):
+        try:
+            self.camera_fx = float(value)
+        except ValueError:
+            pass
+    
+    def set_camera_fy(self, value: str):
+        try:
+            self.camera_fy = float(value)
+        except ValueError:
+            pass
+    
+    def set_camera_cx(self, value: str):
+        try:
+            self.camera_cx = float(value)
+        except ValueError:
+            pass
+    
+    def set_camera_cy(self, value: str):
+        try:
+            self.camera_cy = float(value)
+        except ValueError:
+            pass
+    
+    def set_camera_k1(self, value: str):
+        try:
+            self.camera_k1 = float(value)
+        except ValueError:
+            pass
+    
+    def set_camera_k2(self, value: str):
+        try:
+            self.camera_k2 = float(value)
+        except ValueError:
+            pass
+    
+    def set_camera_p1(self, value: str):
+        try:
+            self.camera_p1 = float(value)
+        except ValueError:
+            pass
+    
+    def set_camera_p2(self, value: str):
+        try:
+            self.camera_p2 = float(value)
+        except ValueError:
+            pass
+    
+    def set_camera_k3(self, value: str):
+        try:
+            self.camera_k3 = float(value)
+        except ValueError:
+            pass
+    
     async def create_calibration(self):
         """Create a new calibration run."""
         data = {
@@ -58,7 +124,18 @@ class CalibrationState(AuthState):
             "charuco_squares_y": self.squares_y,
             "charuco_square_length": self.square_len,
             "charuco_marker_length": self.marker_len,
-            "charuco_dictionary": "DICT_5X5_100"
+            "charuco_dictionary": "DICT_5X5_100",
+            # Camera parameters (now required)
+            "camera_fx": self.camera_fx,
+            "camera_fy": self.camera_fy,
+            "camera_cx": self.camera_cx,
+            "camera_cy": self.camera_cy,
+            "camera_k1": self.camera_k1,
+            "camera_k2": self.camera_k2,
+            "camera_p1": self.camera_p1,
+            "camera_p2": self.camera_p2,
+            "camera_k3": self.camera_k3,
+            "camera_calibration_source": "manual"
         }
         
         response = await APIClient.post("/calibrations", json_data=data, token=self.token)

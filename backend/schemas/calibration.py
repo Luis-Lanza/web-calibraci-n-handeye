@@ -18,6 +18,18 @@ class CalibrationRunCreate(BaseModel):
     charuco_marker_length: float = Field(75.0, gt=0, description="Marker length in mm")
     charuco_dictionary: str = Field("DICT_5X5_100", description="ArUco dictionary name")
     
+    # Camera calibration parameters (optional)
+    camera_fx: Optional[float] = Field(None, description="Camera focal length X")
+    camera_fy: Optional[float] = Field(None, description="Camera focal length Y")
+    camera_cx: Optional[float] = Field(None, description="Camera principal point X")
+    camera_cy: Optional[float] = Field(None, description="Camera principal point Y")
+    camera_k1: Optional[float] = Field(None, description="Radial distortion k1")
+    camera_k2: Optional[float] = Field(None, description="Radial distortion k2")
+    camera_p1: Optional[float] = Field(None, description="Tangential distortion p1")
+    camera_p2: Optional[float] = Field(None, description="Tangential distortion p2")
+    camera_k3: Optional[float] = Field(None, description="Radial distortion k3")
+    camera_calibration_source: Optional[str] = Field(None, description="Source: 'default', 'manual', or 'file'")
+    
     @validator('charuco_marker_length')
     def marker_smaller_than_square(cls, v, values):
         if 'charuco_square_length' in values and v >= values['charuco_square_length']:
@@ -36,18 +48,31 @@ class CalibrationRunResponse(BaseModel):
     charuco_square_length: float
     charuco_marker_length: float
     charuco_dictionary: str
-    transformation_matrix: Optional[List[List[float]]]
-    reprojection_error: Optional[float]
-    rotation_error_deg: Optional[float]
-    translation_error_mm: Optional[float]
-    poses_valid: Optional[int]
-    poses_processed: Optional[int]
-    method: Optional[str]
-    robot_poses_input_method: Optional[str]
-    csv_filename: Optional[str]
+    transformation_matrix: Optional[List[List[float]]] = None
+    reprojection_error: Optional[float] = None
+    rotation_error_deg: Optional[float] = None
+    translation_error_mm: Optional[float] = None
+    poses_valid: Optional[int] = None
+    poses_processed: Optional[int] = None
+    method: Optional[str] = None
+    robot_poses_input_method: Optional[str] = None
+    csv_filename: Optional[str] = None
+    notes: Optional[str] = None
     created_at: datetime
     user_id: int
-    algorithm_params_id: int
+    algorithm_params_id: Optional[int] = None
+    
+    # Camera calibration parameters
+    camera_fx: Optional[float] = None
+    camera_fy: Optional[float] = None
+    camera_cx: Optional[float] = None
+    camera_cy: Optional[float] = None
+    camera_k1: Optional[float] = None
+    camera_k2: Optional[float] = None
+    camera_p1: Optional[float] = None
+    camera_p2: Optional[float] = None
+    camera_k3: Optional[float] = None
+    camera_calibration_source: Optional[str] = None
     
     class Config:
         from_attributes = True  # For Pydantic v2 (was orm_mode in v1)

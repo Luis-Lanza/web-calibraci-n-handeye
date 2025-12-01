@@ -78,9 +78,42 @@ class CalibrationService:
                 dictionary_name=calib_run.charuco_dictionary
             )
             
-            # Get camera parameters (using defaults for now)
-            camera_matrix = get_default_camera_matrix()
-            dist_coeffs = get_default_distortion_coeffs()
+            # Get camera parameters - use stored values if available, otherwise defaults
+            if (calib_run.camera_fx is not None and 
+                calib_run.camera_fy is not None and
+                calib_run.camera_cx is not None and
+                calib_run.camera_cy is not None):
+                # Use stored camera intrinsic parameters
+                camera_matrix = np.array([
+                    [calib_run.camera_fx, 0, calib_run.camera_cx],
+                    [0, calib_run.camera_fy, calib_run.camera_cy],
+                    [0, 0, 1]
+                ], dtype=np.float64)
+                print(f"✓ Using calibration-specific camera matrix (fx={calib_run.camera_fx:.2f}, fy={calib_run.camera_fy:.2f})")
+            else:
+                # Use defaults
+                camera_matrix = get_default_camera_matrix()
+                print("⚠ Using default camera matrix (no calibration-specific parameters provided)")
+            
+            # Get distortion coefficients - use stored values if available
+            if (calib_run.camera_k1 is not None and
+                calib_run.camera_k2 is not None and
+                calib_run.camera_p1 is not None and
+                calib_run.camera_p2 is not None and
+                calib_run.camera_k3 is not None):
+                # Use stored distortion coefficients
+                dist_coeffs = np.array([
+                    calib_run.camera_k1,
+                    calib_run.camera_k2,
+                    calib_run.camera_p1,
+                    calib_run.camera_p2,
+                    calib_run.camera_k3
+                ], dtype=np.float64)
+                print(f"✓ Using calibration-specific distortion coefficients (k1={calib_run.camera_k1:.4f})")
+            else:
+                # Use defaults
+                dist_coeffs = get_default_distortion_coeffs()
+                print("⚠ Using default distortion coefficients (no calibration-specific parameters provided)")
             
             # Process images and estimate camera poses
             camera_poses_result = self._process_images_and_estimate_poses(

@@ -59,6 +59,18 @@ class CalibrationRun(Base):
     method = Column(String(50), nullable=True)  # Calibration method used (e.g., "Tsai-Lenz")
     status = Column(SQLEnum(CalibrationStatus), default=CalibrationStatus.PENDING, nullable=False)
     
+    # Camera calibration parameters (intrinsic matrix and distortion coefficients)
+    camera_fx = Column(Float, nullable=True)  # Focal length X
+    camera_fy = Column(Float, nullable=True)  # Focal length Y
+    camera_cx = Column(Float, nullable=True)  # Principal point X
+    camera_cy = Column(Float, nullable=True)  # Principal point Y
+    camera_k1 = Column(Float, nullable=True)  # Radial distortion k1
+    camera_k2 = Column(Float, nullable=True)  # Radial distortion k2
+    camera_p1 = Column(Float, nullable=True)  # Tangential distortion p1
+    camera_p2 = Column(Float, nullable=True)  # Tangential distortion p2
+    camera_k3 = Column(Float, nullable=True)  # Radial distortion k3
+    camera_calibration_source = Column(String(20), nullable=True)  # "default", "manual", or "file"
+    
     # Additional metadata
     notes = Column(String(500), nullable=True)
     

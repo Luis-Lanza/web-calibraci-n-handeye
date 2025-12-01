@@ -79,6 +79,111 @@ def create_calibration_page() -> rx.Component:
                             width="100%"
                         ),
                         
+                        rx.divider(),
+                        
+                        # Camera Parameters Section (Required)
+                        rx.heading("Parámetros de Cámara", size="4"),
+                        rx.text(
+                            "Parámetros intrínsecos de calibración de la cámara",
+                            color="gray",
+                            size="2"
+                        ),
+                        
+                        rx.heading("Matriz Intrínseca", size="3", margin_top="3"),
+                        rx.grid(
+                            rx.vstack(
+                                rx.text("fx (Focal X)", size="2", weight="bold"),
+                                rx.input(
+                                    value=CalibrationState.camera_fx.to_string(),
+                                    on_change=CalibrationState.set_camera_fx,
+                                    type="number",
+                                    style=INPUT_STYLE
+                                )
+                            ),
+                            rx.vstack(
+                                rx.text("fy (Focal Y)", size="2", weight="bold"),
+                                rx.input(
+                                    value=CalibrationState.camera_fy.to_string(),
+                                    on_change=CalibrationState.set_camera_fy,
+                                    type="number",
+                                    style=INPUT_STYLE
+                                )
+                            ),
+                            rx.vstack(
+                                rx.text("cx (Centro X)", size="2", weight="bold"),
+                                rx.input(
+                                    value=CalibrationState.camera_cx.to_string(),
+                                    on_change=CalibrationState.set_camera_cx,
+                                    type="number",
+                                    style=INPUT_STYLE
+                                )
+                            ),
+                            rx.vstack(
+                                rx.text("cy (Centro Y)", size="2", weight="bold"),
+                                rx.input(
+                                    value=CalibrationState.camera_cy.to_string(),
+                                    on_change=CalibrationState.set_camera_cy,
+                                    type="number",
+                                    style=INPUT_STYLE
+                                )
+                            ),
+                            columns="2",
+                            spacing="3",
+                            width="100%"
+                        ),
+                        
+                        rx.heading("Coeficientes de Distorsión", size="3", margin_top="3"),
+                        rx.grid(
+                            rx.vstack(
+                                rx.text("k1 (Radial)", size="2", weight="bold"),
+                                rx.input(
+                                    value=CalibrationState.camera_k1.to_string(),
+                                    on_change=CalibrationState.set_camera_k1,
+                                    type="number",
+                                    style=INPUT_STYLE
+                                )
+                            ),
+                            rx.vstack(
+                                rx.text("k2 (Radial)", size="2", weight="bold"),
+                                rx.input(
+                                    value=CalibrationState.camera_k2.to_string(),
+                                    on_change=CalibrationState.set_camera_k2,
+                                    type="number",
+                                    style=INPUT_STYLE
+                                )
+                            ),
+                            rx.vstack(
+                                rx.text("p1 (Tangencial)", size="2", weight="bold"),
+                                rx.input(
+                                    value=CalibrationState.camera_p1.to_string(),
+                                    on_change=CalibrationState.set_camera_p1,
+                                    type="number",
+                                    style=INPUT_STYLE
+                                )
+                            ),
+                            rx.vstack(
+                                rx.text("p2 (Tangencial)", size="2", weight="bold"),
+                                rx.input(
+                                    value=CalibrationState.camera_p2.to_string(),
+                                    on_change=CalibrationState.set_camera_p2,
+                                    type="number",
+                                    style=INPUT_STYLE
+                                )
+                            ),
+                            rx.vstack(
+                                rx.text("k3 (Radial)", size="2", weight="bold"),
+                                rx.input(
+                                    value=CalibrationState.camera_k3.to_string(),
+                                    on_change=CalibrationState.set_camera_k3,
+                                    type="number",
+                                    style=INPUT_STYLE
+                                )
+                            ),
+                            columns="2",
+                            spacing="3",
+                            width="100%"
+                        ),
+                        
                         rx.button(
                             "Crear Calibración",
                             on_click=CalibrationState.create_calibration,

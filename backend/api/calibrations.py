@@ -63,6 +63,17 @@ def create_calibration(
         charuco_square_length=calibration.charuco_square_length,
         charuco_marker_length=calibration.charuco_marker_length,
         charuco_dictionary=calibration.charuco_dictionary,
+        # Camera calibration parameters
+        camera_fx=calibration.camera_fx,
+        camera_fy=calibration.camera_fy,
+        camera_cx=calibration.camera_cx,
+        camera_cy=calibration.camera_cy,
+        camera_k1=calibration.camera_k1,
+        camera_k2=calibration.camera_k2,
+        camera_p1=calibration.camera_p1,
+        camera_p2=calibration.camera_p2,
+        camera_k3=calibration.camera_k3,
+        camera_calibration_source=calibration.camera_calibration_source,
         user_id=current_user.id,
         algorithm_params_id=1  # Default algorithm params
     )
