@@ -74,27 +74,32 @@ class CalibrationState(AuthState):
         """Load calibration data by ID."""
         await self.check_auth()
         
-        # Get ID from URL params (handled by page load)
-        # In Reflex, route args are available in self.router.page.params
-        # But for now let's rely on the state variable being set or passed
+        # Extract calibration_id from URL parameters
+        # Reflex stores route parameters in self.router.page.params
+        calibration_id_str = self.router.page.params.get("calibration_id", "")
         
-        # We need to get the ID from the router if it's not set
-        # This is a bit tricky in async load. 
-        # Let's assume for now we use the one in state if set.
+        if calibration_id_str:
+            try:
+                self.current_calibration_id = int(calibration_id_str)
+            except (ValueError, TypeError):
+                print(f"Invalid calibration_id: {calibration_id_str}")
+                return
         
         if not self.current_calibration_id:
-            # Try to get from router params if possible, or it might be passed as arg to on_load
-            pass
+            print("No calibration_id found in URL or state")
+            return
             
         response = await APIClient.get(f"/calibrations/{self.current_calibration_id}", token=self.token)
         if response.status_code == 200:
             self.calibration = response.json()
-        
+        else:
+            print(f"Failed to load calibration: {response.status_code} - {response.text}")
+    
         # Load images
         img_resp = await APIClient.get(f"/calibrations/{self.current_calibration_id}/images", token=self.token)
         if img_resp.status_code == 200:
             self.images = img_resp.json()
-            
+        
         # Load poses
         pose_resp = await APIClient.get(f"/calibrations/{self.current_calibration_id}/robot-poses", token=self.token)
         if pose_resp.status_code == 200:
@@ -105,15 +110,6 @@ class CalibrationState(AuthState):
         if not files:
             return
             
-        # Prepare files for upload
-        # Note: Reflex handles file uploads differently, we need to read the file content
-        # and send it via APIClient. But APIClient expects a dict of files.
-        # Since Reflex upload handling is complex with async, we might need a simpler approach
-        # or use the backend upload handler directly if possible.
-        
-        # For now, let's assume we can send them one by one or in batch
-        # This part requires careful implementation with Reflex's upload component
-        
         upload_data = []
         for file in files:
             content = await file.read()

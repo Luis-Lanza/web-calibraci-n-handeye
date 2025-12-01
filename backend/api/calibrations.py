@@ -85,7 +85,7 @@ def list_calibrations(
     """
     List calibration runs with optional status filter.
     
-    Users can only see their own calibrations unless they are engineers.
+    All users can see all calibrations (shared workspace).
     """
     query = db.query(CalibrationRun)
     
@@ -93,9 +93,7 @@ def list_calibrations(
     if status:
         query = query.filter(CalibrationRun.status == status)
     
-    # Non-engineers can only see their own calibrations
-    if current_user.role.value != "engineer" and current_user.role.value != "supervisor":
-        query = query.filter(CalibrationRun.user_id == current_user.id)
+    # All users can see all calibrations (removed role-based filtering)
     
     calibrations = query.offset(skip).limit(limit).all()
     return calibrations
