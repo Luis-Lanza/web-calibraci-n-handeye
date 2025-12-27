@@ -42,7 +42,7 @@ uploads/*
 !uploads/.gitkeep
 
 
-README.md
+
 development_plan.md
 handeye_calibration.db
 handeye_calibration.db-shm
