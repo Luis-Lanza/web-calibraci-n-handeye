@@ -104,7 +104,10 @@ def list_calibrations(
     if status:
         query = query.filter(CalibrationRun.status == status)
     
-    # All users can see all calibrations (removed role-based filtering)
+    # Seguridad A01: Control de Acceso (IDOR) - Filtrar por usuario a menos que sea Admin/Supervisor
+    # Engineers and Supervisors can see all, Technicians only their own
+    if current_user.role.value not in ["engineer", "supervisor"]:
+        query = query.filter(CalibrationRun.user_id == current_user.id)
     
     calibrations = query.offset(skip).limit(limit).all()
     return calibrations
@@ -123,6 +126,7 @@ def get_calibration(
         raise HTTPException(status_code=404, detail="Calibration not found")
     
     # Check permissions (only creator or engineers can view)
+    # Seguridad A01: Validación de propiedad de recursos para prevenir IDOR
     if calibration.user_id != current_user.id and current_user.role.value not in ["engineer", "supervisor"]:
         raise HTTPException(status_code=403, detail="Not authorized to view this calibration")
     

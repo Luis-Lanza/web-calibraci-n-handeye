@@ -14,12 +14,16 @@ from backend.schemas.token import Token
 from backend.auth.security import verify_password, create_access_token, get_password_hash
 from backend.auth.dependencies import get_current_active_user
 from backend.config import settings
+from backend.utils.limiter import limiter
+from fastapi import Request
 
 router = APIRouter()
 
 
 @router.post("/token", response_model=Token)
+@limiter.limit("5/minute") # Seguridad A07: Rate Limiting para prevenir fuerza bruta
 async def login(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
@@ -60,7 +64,8 @@ async def login(
             from backend.services.email_service import EmailService
             
             code = EmailService.generate_code()
-            user.mfa_code = code
+            # Seguridad A02: Encriptar código MFA antes de guardar
+            user.set_mfa_code(code)
             user.mfa_code_expires_at = datetime.utcnow() + timedelta(minutes=5)
             db.commit()
             
@@ -73,7 +78,10 @@ async def login(
             )
         else:
             # Verify code
-            if not user.mfa_code or not user.mfa_code_expires_at:
+            # Seguridad A02: Desencriptar para verificar
+            stored_code = user.get_mfa_code()
+            
+            if not stored_code or not user.mfa_code_expires_at:
                  raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid MFA code",
@@ -85,7 +93,7 @@ async def login(
                     detail="MFA code expired",
                 )
                 
-            if form_data.client_secret != user.mfa_code:
+            if form_data.client_secret != stored_code:
                  raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid MFA code",
@@ -103,6 +111,22 @@ async def login(
         expires_delta=access_token_expires
     )
     
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/refresh", response_model=Token)
+async def refresh_token(
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Refresh access token.
+    Seguridad A07: Rotación de sesiones
+    """
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": current_user.username, "role": current_user.role.value},
+        expires_delta=access_token_expires
+    )
     return {"access_token": access_token, "token_type": "bearer"}
 
 

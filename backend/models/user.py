@@ -37,7 +37,8 @@ class User(Base):
     
     # MFA fields
     mfa_enabled = Column(Boolean, default=False, nullable=False)
-    mfa_code = Column(String(6), nullable=True)  # Temporary 6-digit code
+    mfa_secret = Column(String(32), nullable=True) # Seguridad A07: Secret for MFA (TOTP/Simulated)
+    mfa_code = Column(String(255), nullable=True)  # Encrypted code
     mfa_code_expires_at = Column(DateTime, nullable=True)
     
     # Relationships
@@ -46,3 +47,24 @@ class User(Base):
     
     def __repr__(self):
         return f"<User(username='{self.username}', role='{self.role.value}')>"
+
+    # Seguridad A02: Métodos para encriptar/desencriptar datos sensibles
+    def set_mfa_secret(self, secret: str):
+        from backend.utils.encryption import EncryptionService
+        self.mfa_secret = EncryptionService.encrypt(secret)
+
+    def get_mfa_secret(self) -> str:
+        from backend.utils.encryption import EncryptionService
+        if not self.mfa_secret:
+            return None
+        return EncryptionService.decrypt(self.mfa_secret)
+
+    def set_mfa_code(self, code: str):
+        from backend.utils.encryption import EncryptionService
+        self.mfa_code = EncryptionService.encrypt(code)
+
+    def get_mfa_code(self) -> str:
+        from backend.utils.encryption import EncryptionService
+        if not self.mfa_code:
+            return None
+        return EncryptionService.decrypt(self.mfa_code)

@@ -19,6 +19,8 @@ class AuthService:
             return {"success": True, "data": response.json()}
         elif response.status_code == 401:
              return {"success": False, "error": "Unauthorized", "status": 401, "detail": response.json().get("detail")}
+        elif response.status_code == 429:
+             return {"success": False, "error": "Too Many Requests", "status": 429, "detail": "Demasiados intentos. Por favor espere un momento."}
         else:
             return {"success": False, "error": "Invalid credentials", "status": response.status_code}
             

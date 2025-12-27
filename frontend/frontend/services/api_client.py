@@ -2,7 +2,7 @@ import httpx
 import reflex as rx
 from typing import Optional, Dict, Any
 
-API_URL = "http://localhost:8000/api/v1"
+API_URL = "http://localhost:8001/api/v1"
 
 class APIClient:
     """Client for making requests to the backend API."""

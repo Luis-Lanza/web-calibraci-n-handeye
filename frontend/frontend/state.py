@@ -50,6 +50,9 @@ class AuthState(rx.State):
                 self.mfa_required = True
                 return rx.window_alert("Código de verificación enviado a su correo.")
             
+            if result.get("status") == 429:
+                return rx.window_alert(result.get("detail"))
+            
             return rx.window_alert("Credenciales inválidas o código incorrecto")
 
     @rx.var
