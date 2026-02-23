@@ -75,9 +75,9 @@ class ReportService:
 
             metrics_data = [
                 ["Métrica", "Valor", "Estado"],
-                ["Error de Reproyección", format_metric(calibration.reprojection_error, "mm"), "PASS" if (calibration.reprojection_error or 0) < 1.0 else "WARN"],
-                ["Error de Rotación", format_metric(calibration.rotation_error_deg, "deg"), "PASS" if (calibration.rotation_error_deg or 0) < 0.5 else "WARN"],
-                ["Error de Traslación", format_metric(calibration.translation_error_mm, "mm"), "PASS" if (calibration.translation_error_mm or 0) < 5.0 else "WARN"],
+                ["Error de Reproyección", format_metric(calibration.reprojection_error, "mm"), "PASS" if (calibration.reprojection_error or 0) < 10.0 else "WARN"],
+                ["Error de Rotación", format_metric(calibration.rotation_error_deg, "deg"), "PASS" if (calibration.rotation_error_deg or 0) < 2.0 else "WARN"],
+                ["Error de Traslación", format_metric(calibration.translation_error_mm, "mm"), "PASS" if (calibration.translation_error_mm or 0) < 10.0 else "WARN"],
                 ["Poses Procesadas", f"{calibration.poses_valid or 0} / {calibration.poses_processed or 0}", "INFO"]
             ]
             

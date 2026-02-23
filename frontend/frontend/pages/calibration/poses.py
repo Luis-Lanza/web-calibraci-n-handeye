@@ -26,7 +26,7 @@ def poses_page() -> rx.Component:
                 rx.box(
                     rx.vstack(
                         rx.heading("Importar CSV", size="4"),
-                        rx.text("Formato: X, Y, Z, Rx, Ry, Rz", size="2", color="gray"),
+                        rx.text("Formato: X, Y, Z, Rx, Ry, Rz o X, Y, Z, A, B, C", size="2", color="gray"),
                         rx.upload(
                             rx.button("Seleccionar CSV", color=ColorPalette.PRIMARY, bg="white", border=f"1px solid {ColorPalette.PRIMARY}"),
                             id="upload_csv",

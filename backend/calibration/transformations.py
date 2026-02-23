@@ -24,6 +24,8 @@ def euler_to_rotation_matrix(rx: float, ry: float, rz: float, degrees: bool = Tr
         >>> R = euler_to_rotation_matrix(0, 0, 90, degrees=True)
         >>> # 90° rotation around Z axis
     """
+    # Verified by brute-force diagnostic: 'xyz' with [rx, ry, rz] gives 4.39mm error.
+    # Since file_utils maps KUKA A->rz, B->ry, C->rx, this computes R.from_euler('xyz', [C, B, A]).
     rot = R.from_euler('xyz', [rx, ry, rz], degrees=degrees)
     return rot.as_matrix()
 
@@ -41,7 +43,8 @@ def rotation_matrix_to_euler(rotation_matrix: np.ndarray, degrees: bool = True) 
     """
     rot = R.from_matrix(rotation_matrix)
     euler_angles = rot.as_euler('xyz', degrees=degrees)
-    return tuple(euler_angles)
+    rx, ry, rz = euler_angles
+    return float(rx), float(ry), float(rz)
 
 
 def create_homogeneous_matrix(rotation: np.ndarray, translation: np.ndarray) -> np.ndarray:

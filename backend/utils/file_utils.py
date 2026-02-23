@@ -129,6 +129,7 @@ def parse_robot_poses_csv(file_content: bytes) -> List[Dict]:
             detail="CSV must have position (X,Y,Z or x,y,z) and rotation (A,B,C or rx,ry,rz) columns"
         )
     
+    # KUKA: A is rotation around Z, B is around Y, C is around X.
     poses = []
     for idx, row in enumerate(reader, start=1):
         try:
@@ -137,9 +138,9 @@ def parse_robot_poses_csv(file_content: bytes) -> List[Dict]:
                 'x': float(row.get('X') or row.get('x')),
                 'y': float(row.get('Y') or row.get('y')),
                 'z': float(row.get('Z') or row.get('z')),
-                'rx': float(row.get('A') or row.get('rx')),
-                'ry': float(row.get('B') or row.get('ry')),
-                'rz': float(row.get('C') or row.get('rz'))
+                'rx': float(row.get('C') or row.get('rx')), # C is rotation around X
+                'ry': float(row.get('B') or row.get('ry')), # B is rotation around Y
+                'rz': float(row.get('A') or row.get('rz'))  # A is rotation around Z
             }
             poses.append(pose)
         except (ValueError, TypeError, KeyError) as e:
