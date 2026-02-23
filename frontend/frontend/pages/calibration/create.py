@@ -7,7 +7,21 @@ def create_calibration_page() -> rx.Component:
     return layout(
         rx.center(
             rx.vstack(
-                rx.heading("Nueva Calibración", size="6", color=ColorPalette.PRIMARY),
+                rx.hstack(
+                    rx.button(
+                        "← Volver",
+                        on_click=rx.redirect("/"),
+                        variant="outline",
+                        color=ColorPalette.PRIMARY,
+                        border=f"1px solid {ColorPalette.PRIMARY}",
+                        size="2",
+                        _hover={"background": ColorPalette.PRIMARY, "color": "white"},
+                    ),
+                    rx.heading("Nueva Calibración", size="6", color=ColorPalette.PRIMARY),
+                    width="100%",
+                    align_items="center",
+                    spacing="3",
+                ),
                 rx.text("Configura los parámetros del tablero ChArUco", color="gray"),
                 
                 rx.box(

@@ -7,6 +7,15 @@ def poses_page() -> rx.Component:
     return layout(
         rx.vstack(
             rx.hstack(
+                rx.button(
+                    "← Volver",
+                    on_click=rx.redirect(f"/calibration/{CalibrationState.current_calibration_id}/images"),
+                    variant="outline",
+                    color=ColorPalette.PRIMARY,
+                    border=f"1px solid {ColorPalette.PRIMARY}",
+                    size="2",
+                    _hover={"background": ColorPalette.PRIMARY, "color": "white"},
+                ),
                 rx.heading("Paso 2: Poses del Robot", size="6", color=ColorPalette.PRIMARY),
                 rx.spacer(),
                 rx.button(

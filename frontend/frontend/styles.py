@@ -38,6 +38,11 @@ INPUT_STYLE = {
     "border_radius": "6px",
     "padding": "8px 12px",
     "color": ColorPalette.GRAY_800,
+    "background": "white",
+    "&::placeholder": {
+        "color": ColorPalette.SECONDARY,
+        "opacity": "1",
+    },
     "_focus": {
         "border_color": ColorPalette.PRIMARY,
         "outline": "none",

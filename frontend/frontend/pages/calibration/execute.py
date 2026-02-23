@@ -6,7 +6,21 @@ from ...styles import ColorPalette, BUTTON_STYLE, CARD_STYLE
 def execute_page() -> rx.Component:
     return layout(
         rx.vstack(
-            rx.heading("Paso 3: Ejecutar Calibración", size="6", color=ColorPalette.PRIMARY),
+            rx.hstack(
+                rx.button(
+                    "← Volver",
+                    on_click=rx.redirect(f"/calibration/{CalibrationState.current_calibration_id}/poses"),
+                    variant="outline",
+                    color=ColorPalette.PRIMARY,
+                    border=f"1px solid {ColorPalette.PRIMARY}",
+                    size="2",
+                    _hover={"background": ColorPalette.PRIMARY, "color": "white"},
+                ),
+                rx.heading("Paso 3: Ejecutar Calibración", size="6", color=ColorPalette.PRIMARY),
+                rx.spacer(),
+                width="100%",
+                align_items="center",
+            ),
             
             rx.text("Verifica que los datos sean correctos antes de ejecutar.", color="gray"),
             

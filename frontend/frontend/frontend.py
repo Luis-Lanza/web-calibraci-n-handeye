@@ -19,7 +19,18 @@ from .pages.settings import settings_page
 def index() -> rx.Component:
     return dashboard_page()
 
-app = rx.App(style=STYLES)
+app = rx.App(
+    style=STYLES,
+    head_components=[
+        rx.el.style("""
+            input::placeholder, textarea::placeholder {
+                color: #6b4c8a !important;
+                opacity: 1 !important;
+                -webkit-text-fill-color: #6b4c8a !important;
+            }
+        """),
+    ],
+)
 app.add_page(login_page, route="/login")
 app.add_page(index, route="/", on_load=DashboardState.load_calibrations)
 app.add_page(create_calibration_page, route="/calibration/new")
