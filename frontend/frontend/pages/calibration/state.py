@@ -149,7 +149,8 @@ class CalibrationState(AuthState):
 
     async def load_calibration(self):
         """Load calibration data by ID."""
-        await self.check_auth()
+        if auth_error := await self.check_auth():
+            return auth_error
         
         # Extract calibration_id from URL parameters
         # Reflex stores route parameters in self.router.page.params

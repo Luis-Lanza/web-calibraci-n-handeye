@@ -12,7 +12,9 @@ class DashboardState(AuthState):
     
     async def load_calibrations(self):
         """Load calibrations from API."""
-        await self.check_auth()
+        if auth_error := await self.check_auth():
+            return auth_error
+            
         response = await APIClient.get("/calibrations", token=self.token)
         if response.status_code == 200:
             self.calibrations = response.json()

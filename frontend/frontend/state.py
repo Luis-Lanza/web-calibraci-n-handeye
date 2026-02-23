@@ -16,10 +16,12 @@ class AuthState(rx.State):
             if result["success"]:
                 self.user = result["data"]
                 self.is_authenticated = True
+                return None
             else:
-                self.logout()
+                return self.logout()
         else:
             self.is_authenticated = False
+            return rx.redirect("/login")
 
     def logout(self):
         """Log out the user."""
